@@ -27,8 +27,13 @@ public class Program {
 		System.out.println("Escolha uma das opçoes acima: ");
 		System.out.println("");
 		
-		System.out.println(lgS.consultExcerpt(listCity, "PORTO ALEGRE", "BELEM"));
+		System.out.println(lgS.consultExcerpt("PORTO ALEGRE", "BELEM"));
 		System.out.println("");
+		String[] rota1 = {"PORTO ALEGRE", "FLORIANOPOLIS", "CURITIBA"};
+		String[] rota2 = {"CURITIBA",  "ARACAJU"};
+
+		System.out.println(lgS.consultRoute(rota1));
+		System.out.println(lgS.consultRoute(rota2));
 		
 		if(listCity != null) {
 			for(City city : listCity) {

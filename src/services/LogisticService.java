@@ -6,7 +6,7 @@ public interface LogisticService<T>{
 
 	public List<T> readDataOfFileCSV(String path);
 	
-	public String consultExcerpt(List<T> listCity, String startCity, String destinationCity);
+	public String consultExcerpt(String startCity, String destinationCity);
 	
-	public String consultRoute(List<T> listCity);
+	public String consultRoute(String... citys);
 }
