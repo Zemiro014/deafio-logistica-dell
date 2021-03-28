@@ -11,21 +11,40 @@ import java.util.Map;
 
 import entities.City;
 
+/*
+ * Essa class é uma classe concreta da interface genérica LogisticService.  Ela oferece a implementação dos métodos fornecida pela interface genérica LogisiticService
+ * */
 public class LogisticServiceImplement implements LogisticService<City> {
-
-	private Double costPerKM;
-	private List<City> listCity = new ArrayList<>();
+	
+	// Declaração das constantes
+	private final double VEHICLE_CONSUMPTION = 2.57;
+	private final double DAILY_DISTANCE = 283;
+	
+	// Variáveis de objecto
+	private Double costPerKM;	
 	private Double totalDistance = 0.0;
+	
+	private List<City> listCity = new ArrayList<>(); // Declarando e inicializando uma lista de cidades
+	
+	public LogisticServiceImplement() { // Construtor sem argumento. Sempre  que a class LogisticServiceImplement for instanciada, por padrão o "costPerKM" terá o seu valor como sendo de 2.10
+		setCostPerKM(2.10);
+	}	
 
-	public LogisticServiceImplement() {
-		setCostPerKM(1.85);
+	public LogisticServiceImplement(Double costPerKM, Double totalDistance) { // Construtor com argumentos
+		this.costPerKM = costPerKM;
+		this.totalDistance = totalDistance;
+		setCostPerKM(2.10);
 	}
 
-	public Double getCostPerKM() {
+	public Double getCostPerKM() { // Método get para obter o custo por km
 		return costPerKM;
 	}
 
-	public void setCostPerKM(Double costPerKM) {
+	public Double getTotalDistance() { // Método get para obter a distância total de uma rota ou de um trecho. Ele não permite ser reconfigurado fora desta class
+		return totalDistance;
+	}
+	
+	public void setCostPerKM(double costPerKM) { // Método set para configurar o valor do custo por km
 		if (costPerKM <= 0) {
 			throw new InputMismatchException(
 					"O valor informado não é aceite. (Provavelmente o valor informado é menor ou igual a 0, ou é um caracter)");
@@ -34,7 +53,7 @@ public class LogisticServiceImplement implements LogisticService<City> {
 	}
 
 	@Override
-	public List<City> readDataOfFileCSV(String path) {
+	public List<City> readDataOfFileCSV(String path) { // Sobreposição do método readDataOfFileCSV que permite ler os dados do arquivo "DNIT-Distancias.csv". Esse método recebe um "path" válido
 		List<City> list = new ArrayList<>();
 		try (BufferedReader br = new BufferedReader(new FileReader(path))) {
 			String lineOfCity = br.readLine(); // Lendo os dados da primeira linha do arquivo para instanciar as cidades
@@ -70,8 +89,9 @@ public class LogisticServiceImplement implements LogisticService<City> {
 	}
 
 	@Override
-	public String consultExcerpt(String startCity, String destinationCity) {
-
+	public String consultExcerpt(String... citys) { // Método que permite consultar um trecho. Ele permite receber masi de uma variável como argumento até mesmo um array de String
+		//StringBuilder sb = new StringBuilder();
+		
 		boolean ex1 = false;
 		boolean ex2 = false;
 		int referenceIndex1 = 0;
@@ -79,35 +99,35 @@ public class LogisticServiceImplement implements LogisticService<City> {
 		double distance = 0;
 
 		for (City city : listCity) {
-			if (city.getName().equalsIgnoreCase(startCity)) {
+			if (city.getName().equalsIgnoreCase(citys[0])) {
 				ex1 = true;
 				referenceIndex1 = city.getDistances().indexOf(0.0);
 			}
-			if (city.getName().equalsIgnoreCase(destinationCity)) {
+			if (city.getName().equalsIgnoreCase(citys[1])) {
 				ex2 = true;
 				referenceIndex2 = city.getDistances().indexOf(0.0);
 			}
 		}
 
-		if (referenceIndex1 < referenceIndex2) {
+		if (referenceIndex1 < referenceIndex2) { // Verifica o sentido do trecho requerido: da esquerda para direita
 			for (int i = referenceIndex1; i <= referenceIndex2; i++) {
 				distance += listCity.get(i).getDistances().get(referenceIndex1);
 			}
-		} else if (referenceIndex1 > referenceIndex2) {
+		} else if (referenceIndex1 > referenceIndex2) { // Verifica o sentido do trecho requerido: da direita para esquerda
 			for (int i = referenceIndex1; i >= referenceIndex2; i--) {
 				distance += listCity.get(i).getDistances().get(referenceIndex1);
 			}
 		}
 
 		if (ex1 == true && ex2 == true) {
-			return "As cidades: " + startCity + ", " + destinationCity
-					+ " existem no sistema. E a distância entre elas é de: " + distance + " km";
+			return "As cidades: " + citys[0] + ", " + citys[1]
+					+ " existem no sistema. A distância entre elas é de: " + distance + " km"+ ". O custo da viagem é de: "+(distance*getCostPerKM())+ " R$";
 		}
-		return "As cidades: " + startCity + ", " + destinationCity + " não existem no sistema";
+		return "Este trecho não pode ser computado porque uma das cidades: " + citys[0] + " ou " + citys[1] + " não existe no sistema";
 	}
 
 	@Override
-	public String consultRoute(String... cities) {
+	public String consultRoute(String... cities) { // Este método permite consultar uma rota. Pode receber duas ou mais varáveis como parâmetros, até mesmo um array de String
 
 		Map<String, City> mapDataCities = getDataCityPerKey(cities);
 		List<String> list = new ArrayList<>();
@@ -115,7 +135,7 @@ public class LogisticServiceImplement implements LogisticService<City> {
 		int referenceIndex;
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("Rota: ");		
+		sb.append("Rota: ");
 		
 		for(String key : mapDataCities.keySet()) {
 			sb.append(mapDataCities.get(key).getName()+" -> ");
@@ -134,12 +154,16 @@ public class LogisticServiceImplement implements LogisticService<City> {
 			}					
 		}
 		sb.append("\n");
-		sb.append("A distância total a ser percorrida é de: "+getTotalDistance()+" km");
+		sb.append("A distância total a ser percorrida é de: "+getTotalDistance()+" km\n");
+		sb.append("O custo da viagem é estimado a: "+(getTotalDistance()*getCostPerKM())+ "0 R$\n");
+		sb.append("O total de gasolina ser consumida: "+(getTotalDistance()*VEHICLE_CONSUMPTION) +" L\n");
+		sb.append("Número de dias para finalizar a viagem: "+(getTotalDistance()/DAILY_DISTANCE) + " dia(s)");
+		
 		sb.append("\n");
 		return sb.toString();
 	}
 
-	private int getReferenceIndex(String value) {
+	private int getReferenceIndex(String value) { // Este é um método auxiliar que esta class usa para obter index de referência das distâncias de cada cidade. A referência é 0.0
 	int index = 0;
 		for (City city : listCity) 
 		{
@@ -151,7 +175,7 @@ public class LogisticServiceImplement implements LogisticService<City> {
 		return index;
 	}
 
-	private Map<String, City> getDataCityPerKey(String... cities) {
+	private Map<String, City> getDataCityPerKey(String... cities) { // Este é um método auxiliar que esta class usa para pegar na base de dados organiza-los por Key e Value. Ele retorna um Map<nomeDaCidade,ObjectDoTipoCity>
 
 		Map<String, City> mapOfDataCities = new LinkedHashMap<>();
 		
@@ -177,7 +201,5 @@ public class LogisticServiceImplement implements LogisticService<City> {
 		return mapOfDataCities;
 	}
 
-	public Double getTotalDistance() {
-		return totalDistance;
-	}
+
 }

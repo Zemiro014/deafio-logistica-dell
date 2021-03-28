@@ -4,6 +4,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * Esta é uma class que será usado como instância. Cada instancia desta class irá representar uma coluna nos dados do arquivo DNIT-Distancias.csv. 
+ * 
+ * A primeira linha de cada coluna  nos dados do arquivo "DNIT-Distancias.csv" é representado pelo name, e as demais linhas da coluna serão representadas na lista distance tendo um index de localização.
+ * */
 public class City implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
